@@ -61,7 +61,6 @@ public class MovementScript : MonoBehaviour {
 
 	public void shoot()
 	{
-		Quaternion angle = Camera.main.ViewportToWorldPoint (Input.mousePosition);
 		GameObject bullet = Instantiate (bulletPrefab, transform.position , Quaternion.identity) as GameObject;
 		bullet.transform.parent = transform;
 	}

@@ -16,6 +16,7 @@ public class BulletScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		rigidbody.transform.
 		transform.position += dir * speed * Time.deltaTime;
 	}
 
