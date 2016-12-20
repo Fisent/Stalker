@@ -4,64 +4,66 @@ using System.Collections;
 public class MovementScript : MonoBehaviour {
 
 	public float speed;
+	public float bulletSpeed;
 	public float padding{ get; set;}
 
 	public GameObject bulletPrefab;
 
-	float xMin;
-	float xMax;
-
-	float yMin;
-	float yMax;
+	private int timer = 0;
 
 	// Use this for initialization
 	void Start () {
 		speed = 19f;
-		padding = 0.51f;
-
-		float distance = transform.position.z - Camera.main.transform.position.z;
-
-		Vector3 leftMost = Camera.main.ViewportToWorldPoint (new Vector3 (0,0,distance));
-		Vector3 rightMost = Camera.main.ViewportToWorldPoint (new Vector3 (1,0,distance));
-
-		xMin = leftMost.x + padding;
-		xMax = rightMost.x - padding;
-
-		Vector3 upMost = Camera.main.ViewportToWorldPoint (new Vector3 (0, 1, distance));
-		Vector3 downMost = Camera.main.ViewportToWorldPoint (new Vector3 (0, 0, distance));
-
-		yMin = downMost.y + padding;
-		yMax = upMost.y - padding;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		
-		if (Input.GetKey (KeyCode.S))
-			transform.position += Vector3.down * speed * Time.deltaTime;
-		if (Input.GetKey(KeyCode.W))
-			transform.position += Vector3.up * speed * Time.deltaTime;
-		if (Input.GetKey(KeyCode.A))
-			transform.position += Vector3.left * speed * Time.deltaTime;
-		if (Input.GetKey(KeyCode.D))
-			transform.position += Vector3.right * speed * Time.deltaTime;
 
-		//restrict x position
-		float newX = Mathf.Clamp (transform.position.x, xMin, xMax);
-		transform.position = new Vector3 (newX, transform.position.y, transform.position.z);
+		Camera.main.transform.position = new Vector3 (transform.position.x, transform.position.y, -10f);
 
-		//restrict y position
-		float newY = Mathf.Clamp(transform.position.y, yMin, yMax);
-		transform.position = new Vector3 (transform.position.x, newY, transform.position.z);
+		Rigidbody2D body = transform.GetComponent<Rigidbody2D> ();
 
-		if (Input.GetKeyDown (KeyCode.Mouse0))
+		if (Input.GetKeyDown (KeyCode.S))
+			body.velocity = new Vector2(body.velocity.x,-speed);
+		if (Input.GetKeyUp (KeyCode.S))
+			body.velocity = new Vector2(body.velocity.x,0);
+		if (Input.GetKeyDown (KeyCode.W))
+			body.velocity = new Vector2(body.velocity.x,speed);
+		if (Input.GetKeyUp (KeyCode.W))
+			body.velocity = new Vector2(body.velocity.x,0);
+		if (Input.GetKeyDown (KeyCode.A))
+			body.velocity = new Vector2 (-speed, body.velocity.y);
+		if (Input.GetKeyUp (KeyCode.A))
+			body.velocity = new Vector2 (0, body.velocity.y);
+		if (Input.GetKeyDown (KeyCode.D))
+			body.velocity = new Vector2 (speed, body.velocity.y);
+		if (Input.GetKeyUp (KeyCode.D))
+			body.velocity = new Vector2 (0, body.velocity.y);
+
+
+		timer++;
+		if (Input.GetKey (KeyCode.Mouse0) && timer % 5 == 0) {
 			shoot ();
+			timer = 0;
+		}
 
+		rotateEveryFrame ();
+	}
+
+	void rotateEveryFrame()
+	{
+		Vector3 mouse = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+		transform.rotation = Quaternion.LookRotation (Vector3.forward, mouse - transform.position);
 	}
 
 	public void shoot()
 	{
-		GameObject bullet = Instantiate (bulletPrefab, transform.position , Quaternion.identity) as GameObject;
-		bullet.transform.parent = transform;
+		Vector2 myPos = transform.position;
+		Vector3 spawnPos = new Vector3 (myPos.x, myPos.y, 1f);
+		Vector2 cursorPos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+		Vector2 direction = cursorPos - myPos;
+		direction.Normalize ();
+		GameObject projectile = Instantiate (bulletPrefab, spawnPos, Quaternion.identity) as GameObject;
+		projectile.GetComponent<Rigidbody2D> ().velocity = direction * bulletSpeed;
 	}
 }

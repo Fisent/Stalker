@@ -9,20 +9,16 @@ public class BulletScript : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-
-		dir = Camera.main.ScreenToWorldPoint (Input.mousePosition) - transform.position;
-		//dir.Normalize();
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		rigidbody.transform.
-		transform.position += dir * speed * Time.deltaTime;
+		
 	}
 
-	public void onCollisionEnter()
+	public void OnCollisionEnter2D(Collision2D coll)
 	{
-		Destroy(this);
+		Destroy(this.gameObject);
 	}
 
 }
